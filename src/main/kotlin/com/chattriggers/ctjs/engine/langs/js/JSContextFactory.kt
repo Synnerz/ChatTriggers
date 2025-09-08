@@ -9,10 +9,16 @@ import java.net.URL
 import java.net.URLClassLoader
 
 object JSContextFactory : ContextFactory() {
-    private val classLoader = ModifiedURLClassLoader()
+    private var classLoader = ModifiedURLClassLoader()
     var optimize = true
 
     fun addAllURLs(urls: List<URL>) = classLoader.addAllURLs(urls)
+
+    internal fun closeLoader() = classLoader.close()
+
+    internal fun buildLoader() {
+        classLoader = ModifiedURLClassLoader()
+    }
 
     override fun onContextCreated(cx: Context) {
         super.onContextCreated(cx)
