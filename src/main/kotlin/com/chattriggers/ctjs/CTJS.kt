@@ -60,7 +60,7 @@ object CTJS {
             val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
             kmf.init(myKeyStore, null)
             tmf.init(myKeyStore)
-            var ctx = SSLContext.getInstance("TLS")
+            val ctx = SSLContext.getInstance("TLS")
             ctx?.init(kmf.keyManagers, tmf.trustManagers, null)
             ctx
         } catch (e: Exception) {
@@ -129,6 +129,8 @@ object CTJS {
     }
 
     private fun reportHashedUUID() {
+        if (!Config.reportHash) return
+
         val uuid = Player.getUUID().encodeToByteArray()
         val salt = (System.getProperty("user.name") ?: "").encodeToByteArray()
         val md = MessageDigest.getInstance("SHA-256")

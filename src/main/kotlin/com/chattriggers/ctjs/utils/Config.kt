@@ -69,6 +69,14 @@ object Config : Vigilant(File(CTJS.configLocation, "ChatTriggers.toml"), sorting
 
     @Property(
         PropertyType.SWITCH,
+        name = "Report Hash",
+        category = "General",
+        description = "Reports your hash to the statistics tracking server"
+    )
+    var reportHash = false
+
+    @Property(
+        PropertyType.SWITCH,
         name = "Clear console on CT load",
         category = "Console",
     )
