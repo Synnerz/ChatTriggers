@@ -5,7 +5,7 @@ buildscript {
     def f = file("gradle/mcversion.txt")
 
     project.ext.mcVersion = f.exists() ? f.readLines().first() as int : 10809
-    ext.kotlin_version = "1.6.0"
+    ext.kotlin_version = "1.9.0"
     ext.dokka_version = "1.6.10"
 
     repositories {
