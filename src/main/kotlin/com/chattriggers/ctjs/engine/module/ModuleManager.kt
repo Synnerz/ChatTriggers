@@ -59,9 +59,6 @@ object ModuleManager {
         val installedModules = getFoldersInDir(modulesFolder).map(::parseModule).distinctBy {
             it.name.lowercase()
         }
-
-        // Check if those modules have updates
-        installedModules.forEach(ModuleUpdater::updateModule)
         cachedModules.addAll(installedModules)
 
         // Import required modules
@@ -74,6 +71,11 @@ object ModuleManager {
         // We're finished setting up all of our loaders,
         //  which means they can now have their ASM invocation re-lookups happen
         IndySupport.invalidateInvocations()
+    }
+
+    fun checkUpdates() {
+        if (!Config.autoUpdateModules) return
+        cachedModules.forEach(ModuleUpdater::updateModule)
     }
 
     private fun loadAssetsAndJars(modules: List<Module>) {
