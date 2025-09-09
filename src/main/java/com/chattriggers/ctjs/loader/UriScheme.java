@@ -2,6 +2,7 @@ package com.chattriggers.ctjs.loader;
 
 import com.chattriggers.ctjs.Reference;
 import com.chattriggers.ctjs.engine.module.ModuleManager;
+import com.chattriggers.ctjs.utils.Config;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
@@ -81,7 +82,9 @@ public class UriScheme {
                     InputStream inputStream = clientSocket.getInputStream();
                     String module = new BufferedReader(new InputStreamReader(inputStream))
                         .lines().collect(Collectors.joining("\n"));
-                    ModuleManager.INSTANCE.importModule(module);
+                    // Update/Import module on init
+                    if (Config.INSTANCE.getAutoUpdateModules())
+                        ModuleManager.INSTANCE.importModule(module);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -92,6 +95,8 @@ public class UriScheme {
     }
 
     private static void connectWithSockets(String module) throws Exception {
+        if (!Config.INSTANCE.getConnectToSocket()) return;
+
         Socket socket = new Socket(InetAddress.getLocalHost(), PORT);
         socket.getOutputStream().write(module.getBytes());
         socket.close();

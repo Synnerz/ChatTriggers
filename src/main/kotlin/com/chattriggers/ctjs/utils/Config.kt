@@ -69,11 +69,27 @@ object Config : Vigilant(File(CTJS.configLocation, "ChatTriggers.toml"), sorting
 
     @Property(
         PropertyType.SWITCH,
-        name = "Report Hash",
+        name = "Auto-update startup only",
+        category = "General",
+        description = "Only auto updates whenever the game starts up not whenever reloading chattriggers"
+    )
+    var autoUpdateStartupOnly = false
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Report hash",
         category = "General",
         description = "Reports your hash to the statistics tracking server"
     )
     var reportHash = false
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Connect to socket",
+        category = "General",
+        description = "Connects to the local socket §cNote: if this is disabled and Auto Update Startup only is enabled it will not work properly"
+    )
+    var connectToSocket = false
 
     @Property(
         PropertyType.SWITCH,
@@ -164,6 +180,11 @@ object Config : Vigilant(File(CTJS.configLocation, "ChatTriggers.toml"), sorting
         addDependency(
             javaClass.getDeclaredField("consoleWarningColor"),
             javaClass.getDeclaredField("consoleErrorAndWarningColors"),
+        )
+
+        addDependency(
+            javaClass.getDeclaredField("autoUpdateStartupOnly"),
+            javaClass.getDeclaredField("autoUpdateModules")
         )
     }
 }

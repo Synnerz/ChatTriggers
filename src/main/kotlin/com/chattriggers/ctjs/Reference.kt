@@ -72,6 +72,8 @@ object Reference {
 
         conditionalThread {
             ModuleManager.setup()
+            if (!Config.autoUpdateStartupOnly)
+                ModuleManager.checkUpdates()
             ModuleManager.entryPass(completionListener = ::printLoadCompletionStatus)
             MouseListener.registerTriggerListeners()
 

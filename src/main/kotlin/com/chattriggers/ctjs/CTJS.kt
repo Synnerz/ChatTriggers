@@ -83,8 +83,10 @@ object CTJS {
             ForgeTrigger
         ).forEach(MinecraftForge.EVENT_BUS::register)
 
-        UriScheme.installUriScheme()
-        UriScheme.createSocketListener()
+        if (Config.connectToSocket) {
+            UriScheme.installUriScheme()
+            UriScheme.createSocketListener()
+        }
     }
 
     @Mod.EventHandler
@@ -95,6 +97,7 @@ object CTJS {
         if (Config.threadedLoading) {
             thread {
                 try {
+                    ModuleManager.checkUpdates()
                     ModuleManager.entryPass()
                     reportHashedUUID()
                 } catch (e: Exception) {
@@ -103,6 +106,7 @@ object CTJS {
                 }
             }
         } else {
+            ModuleManager.checkUpdates()
             ModuleManager.entryPass()
             thread {
                 reportHashedUUID()
