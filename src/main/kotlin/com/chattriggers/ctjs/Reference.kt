@@ -62,7 +62,9 @@ object Reference {
 
     @JvmStatic
     fun loadCT() {
-        Client.getMinecraft().gameSettings.saveOptions()
+        Client.scheduleTask {
+            Client.getMinecraft().gameSettings.saveOptions()
+        }
         unloadCT(false)
 
         JSContextFactory.buildLoader()
@@ -77,7 +79,9 @@ object Reference {
             ModuleManager.entryPass(completionListener = ::printLoadCompletionStatus)
             MouseListener.registerTriggerListeners()
 
-            Client.getMinecraft().gameSettings.loadOptions()
+            Client.scheduleTask {
+                Client.getMinecraft().gameSettings.loadOptions()
+            }
             ChatLib.chat("&aDone reloading scripts!")
             isLoaded = true
 
