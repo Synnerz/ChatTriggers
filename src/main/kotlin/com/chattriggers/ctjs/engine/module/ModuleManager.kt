@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils
 import org.mozilla.javascript.Context
 import java.io.File
 import java.lang.invoke.MethodHandle
+import java.lang.ref.WeakReference
 import java.net.URLClassLoader
 
 object ModuleManager {
@@ -134,7 +135,7 @@ object ModuleManager {
         }
     }
 
-    fun asmInvokeLookup(moduleName: String, functionID: String): MethodHandle {
+    fun asmInvokeLookup(moduleName: String, functionID: String): WeakReference<MethodHandle> {
         // Find the targeted module
         val module = cachedModules.first { it.name == moduleName }
 

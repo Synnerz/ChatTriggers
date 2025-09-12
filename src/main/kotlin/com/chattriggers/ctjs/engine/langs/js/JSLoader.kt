@@ -23,6 +23,7 @@ import java.io.File
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
+import java.lang.ref.WeakReference
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -163,15 +164,15 @@ object JSLoader : ILoader {
         }
     }
 
-    override fun asmInvokeLookup(module: Module, functionURI: URI): MethodHandle {
+    override fun asmInvokeLookup(module: Module, functionURI: URI): WeakReference<MethodHandle> {
         return wrapInContext {
             try {
-                val returned = require.loadCTModule(module.name, functionURI)
+                val returned = require.loadCTModule("${module.name}-asmexp$$", functionURI)
                 val func = ScriptableObject.getProperty(returned, "default") as Callable
 
                 // When a call to this function ID is made, we always want to point it
                 // to our asmInvoke method, which in turn should always call [func].
-                INVOKE_JS_CALL.bindTo(func)
+                WeakReference(INVOKE_JS_CALL.bindTo(func))
             } catch (e: Throwable) {
                 println("Error loading asm function $functionURI in module ${module.name}.")
                 e.printStackTrace()
@@ -185,11 +186,11 @@ object JSLoader : ILoader {
                 // If we can't resolve the target function correctly, we will return
                 //  a no-op method handle that will always return null.
                 //  It still needs to match the method type (Object[])Object, so we drop the arguments param.
-                MethodHandles.dropArguments(
+                WeakReference(MethodHandles.dropArguments(
                     MethodHandles.constant(Any::class.java, null),
                     0,
                     Array<Any?>::class.java,
-                )
+                ))
             }
         }
     }

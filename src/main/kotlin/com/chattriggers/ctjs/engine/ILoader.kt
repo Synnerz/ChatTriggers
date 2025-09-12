@@ -8,6 +8,7 @@ import com.chattriggers.ctjs.utils.console.Console
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.lang.invoke.MethodHandle
+import java.lang.ref.WeakReference
 import java.net.URI
 import java.net.URL
 
@@ -44,7 +45,7 @@ interface ILoader {
      *
      * @return a [MethodHandle] with type (Object[])Object
      */
-    fun asmInvokeLookup(module: Module, functionURI: URI): MethodHandle
+    fun asmInvokeLookup(module: Module, functionURI: URI): WeakReference<MethodHandle>
 
     /**
      * Tells the loader that it should activate all triggers

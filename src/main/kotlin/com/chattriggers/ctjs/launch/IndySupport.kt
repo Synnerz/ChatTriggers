@@ -2,9 +2,12 @@ package com.chattriggers.ctjs.launch
 
 import com.chattriggers.ctjs.engine.module.ModuleManager
 import java.lang.invoke.*
+import java.util.*
 
 object IndySupport {
     private var invocationInvalidator = SwitchPoint()
+    private val callSiteToInit: MutableMap<MutableCallSite, MethodHandle> =
+        Collections.synchronizedMap(WeakHashMap())
 
     @JvmStatic
     fun bootstrapInvokeJS(
@@ -38,6 +41,7 @@ object IndySupport {
         )
 
         callSite.target = initHandle.asType(type)
+        callSiteToInit[callSite] = initHandle
         return callSite
     }
 
@@ -45,7 +49,7 @@ object IndySupport {
     fun initInvokeJS(callSite: MutableCallSite, moduleName: String, functionID: String, args: Array<Any?>): Any? {
         // Make an initial lookup to the target function, this is where we want our bytecode invoke
         // to actually point to.
-        val targetHandle = ModuleManager.asmInvokeLookup(moduleName, functionID)
+        val targetHandle = ModuleManager.asmInvokeLookup(moduleName, functionID).get() ?: return null
 
         // Until we /ct load that is. When we reload, we need to re-resolve all js invocation targets
         // because our old script engine has been thrown away and recreated, plus the user
@@ -70,5 +74,11 @@ object IndySupport {
     fun invalidateInvocations() {
         SwitchPoint.invalidateAll(arrayOf(invocationInvalidator))
         invocationInvalidator = SwitchPoint()
+
+        synchronized(callSiteToInit) {
+            callSiteToInit.forEach { (callSite, initHandle) ->
+                callSite.target = initHandle.asType(callSite.type())
+            }
+        }
     }
 }
