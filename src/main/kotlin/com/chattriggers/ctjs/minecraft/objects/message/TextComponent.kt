@@ -303,7 +303,8 @@ class TextComponent {
         // a modified version of ForgeHooks.URL_PATTERN disallowing connecting to IPs
         //           schema             namespace            port   path         ends
             //   |-------------|  |------------------|    |-------| |--|   |---------------|
-            "((?:[a-z\\d]{2,}://)?[-\\w.]+\\.[a-z]{2,}?(?::\\d{1,5})?.*?(?=[!\"\u00A7 \n]|$))".toRegex()
+            "(\\u00A7[\\da-fk-or])?((?:[a-z\\d]{2,}://)?[-\\w.]+\\.[a-z]{2,}?(?::\\d{1,5})?.*?(?=[!\"\\u00A7 \n]|$))".toRegex()
+            // ^ "Fixed" version of ChatTriggers' regex, this one however only accepts a single formatting color code as its chat style
 
         private val formatRegex = "[\u00A7&][\\da-fk-or]".toRegex()
     }
