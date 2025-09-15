@@ -1,10 +1,7 @@
 package com.chattriggers.ctjs.engine.langs.js
 
-import org.mozilla.javascript.Context
+import org.mozilla.javascript.*
 import org.mozilla.javascript.Context.FEATURE_LOCATION_INFORMATION_IN_ERROR
-import org.mozilla.javascript.ContextFactory
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.WrapFactory
 import java.net.URL
 import java.net.URLClassLoader
 
@@ -23,28 +20,41 @@ object JSContextFactory : ContextFactory() {
     override fun onContextCreated(cx: Context) {
         super.onContextCreated(cx)
 
-        // cx.debugOutputPath = File(".", "DEBUG")
         cx.applicationClassLoader = classLoader
         cx.optimizationLevel = if (optimize) 9 else 0
         cx.languageVersion = Context.VERSION_ES6
         cx.errorReporter = JSErrorReporter(JSLoader.console.writer.printWriter)
-        cx.wrapFactory = object : WrapFactory() {
-            override fun wrap(cx: Context?, scope: Scriptable?, obj: Any?, staticType: Class<*>?): Any? {
-                if (obj is Collection<*>) {
-                    // TODO: Wrapping an array is somewhat slow
-                    return super.wrap(cx, scope, obj.toTypedArray(), staticType)
-                }
+        cx.wrapFactory = WrapFactory().apply { isJavaPrimitiveWrap = false }
 
-                return super.wrap(cx, scope, obj, staticType)
+        addListener(object : Listener {
+            override fun contextCreated(ctx: Context) {
+                ctx.languageVersion = 200
+                ctx.setTrackUnhandledPromiseRejections(true)
             }
-        }.apply { isJavaPrimitiveWrap = false }
+
+            override fun contextReleased(ctx: Context) {
+                ctx.processMicrotasks()
+
+                ctx.unhandledPromiseTracker.process { result: Any? ->
+                    var msg = "Unhandled rejected promise: " + Context.toString(result)
+                    if (result is Scriptable) {
+                        val stack = ScriptableObject.getProperty(result as Scriptable?, "stack")
+                        if (stack != null && stack !== Scriptable.NOT_FOUND) {
+                            msg += """
+                        
+                        ${Context.toString(stack)}
+                        """.trimIndent()
+                        }
+                    }
+                    // TODO: perhaps make this be in console instead of logs
+                    println(msg)
+                }
+            }
+        })
     }
 
     override fun hasFeature(cx: Context?, featureIndex: Int): Boolean {
-        when (featureIndex) {
-            FEATURE_LOCATION_INFORMATION_IN_ERROR -> return true
-            // EMIT_DEBUG_OUTPUT -> return Launch.blackboard.getOrDefault("fml.deobfuscatedEnvironment", false) as Boolean
-        }
+        if (featureIndex == FEATURE_LOCATION_INFORMATION_IN_ERROR) return true
 
         return super.hasFeature(cx, featureIndex)
     }
